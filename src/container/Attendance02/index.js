@@ -81,11 +81,11 @@ const Calendar = () => {
           <ListItem button onClick={() => navigate("/attendance")}>
             <ListItemText primary="Lịch làm việc" />
           </ListItem>
-          <ListItem button onClick={() => navigate("/user")}>
-            <ListItemText primary="Danh sách nhân viên" />
+          <ListItem button  style={{color: 'red'}}  onClick={() => navigate("/attendance/collect")}>
+            <ListItemText primary="Chấm công" />
           </ListItem>
           <ListItem button onClick={() => navigate("/user_collect")}>
-            <ListItemText primary="Đăng ký" />
+            <ListItemText primary="Đơn từ" />
           </ListItem>
         </List>
       </Drawer>

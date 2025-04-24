@@ -82,7 +82,7 @@ const UserManager = () => {
       >
         <Toolbar />
         <List>
-          <ListItem button onClick={() => navigate("/user")}>
+          <ListItem sx={{ color:'red'}} button onClick={() => navigate("/user")}>
             <ListItemText primary="Danh sách nhân viên" />
           </ListItem>
           <ListItem button onClick={() => navigate("/user_collect")}>
@@ -120,19 +120,23 @@ const UserManager = () => {
                 <Table>
                   <TableHead>
                     <TableRow>
-                      <TableCell>ID</TableCell>
+                      <TableCell>Mã nhân viên</TableCell>
                       <TableCell>Họ tên</TableCell>
                       <TableCell>Email</TableCell>
                       <TableCell>Số điện thoại</TableCell>
+                      <TableCell>Giới tính</TableCell>
+                      <TableCell>Địa chỉ</TableCell>
                     </TableRow>
                   </TableHead>
                   <TableBody>
                     {users.map((user) => (
                       <TableRow key={user.id}>
                         <TableCell>{user.id}</TableCell>
-                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.fullName}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.phone}</TableCell>
+                        <TableCell>{user.gender}</TableCell>
+                        <TableCell>{user.address}</TableCell>
                       </TableRow>
                     ))}
                   </TableBody>

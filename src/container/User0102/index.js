@@ -12,6 +12,10 @@ import {
   TextField,
   Button,
   Alert,
+  MenuItem, 
+  Select, 
+  InputLabel, 
+  FormControl
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { createUser } from "./config"; // đảm bảo đường dẫn đúng
@@ -20,7 +24,7 @@ const drawerWidth = 240;
 
 const UserManager = () => {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
+  const [formData, setFormData] = useState({ fullName: "", email: "", phone: "", gender: "", address: "", image: ""  });
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
 
@@ -113,8 +117,8 @@ const UserManager = () => {
             <TextField
               fullWidth
               label="Họ tên"
-              name="name"
-              value={formData.name}
+              name="fullName"
+              value={formData.fullName}
               onChange={handleChange}
               margin="normal"
               required
@@ -134,6 +138,29 @@ const UserManager = () => {
               label="Số điện thoại"
               name="phone"
               value={formData.phone}
+              onChange={handleChange}
+              margin="normal"
+              required
+            />
+           <FormControl fullWidth margin="normal" required>
+            <InputLabel id="gender-label">Giới tính</InputLabel>
+            <Select
+              labelId="gender-label"
+              id="gender"
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              label="Giới tính"
+            >
+              <MenuItem value={0}>Nam</MenuItem>
+              <MenuItem value={1}>Nữ</MenuItem>
+            </Select>
+          </FormControl>
+            <TextField
+              fullWidth
+              label="Địa chỉ"
+              name="address"
+              value={formData.address}
               onChange={handleChange}
               margin="normal"
               required
