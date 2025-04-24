@@ -19,8 +19,21 @@ const Dashboard = () => {
           display: "flex",
           justifyContent: "center",
           alignItems: "center",
+          flexDirection: "column",
         }}
       >
+        <Grid container marginBottom={10} justifyContent="center" direction="column">
+          <Grid item>
+            <Typography style={{ textAlign: 'center', fontSize: '32px', textTransform: "uppercase", fontWeight: "bold"}}>
+              Hệ thống quản lý y khoa
+            </Typography>
+          </Grid>
+          <Grid item>
+            <Typography style={{ textAlign: 'center', fontSize: '16px'}}>
+              Vui lòng chọn module tương ứng
+            </Typography>
+          </Grid>
+        </Grid>
         <Grid container spacing={4} justifyContent="center">
           <Grid item>
             <Card sx={{ width: 250 }}>
