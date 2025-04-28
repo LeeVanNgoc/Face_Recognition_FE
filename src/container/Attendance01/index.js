@@ -84,7 +84,7 @@ const Calendar = () => {
           <ListItem button onClick={() => navigate("/attendance/collect")}>
             <ListItemText primary="Chấm công" />
           </ListItem>
-          <ListItem button onClick={() => navigate("/user_collect")}>
+          <ListItem button onClick={() => navigate("/attendance/added")}>
             <ListItemText primary="Đơn từ" />
           </ListItem>
         </List>

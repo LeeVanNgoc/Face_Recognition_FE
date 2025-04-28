@@ -1,0 +1,73 @@
+/* Thêm một số style để giao diện đẹp hơn */
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+  }
+  
+  .webcam-container {
+    width: 70%;
+    max-width: 800px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+  }
+  
+  .webcam-header {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  
+  .webcam-header h1 {
+    color: #333;
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  
+  .header-description {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  .webcam-frame {
+    position: relative;
+  }
+  
+  .webcam-video {
+    border: 2px solid #ccc;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .controls {
+    text-align: center;
+    margin-top: 20px;
+  }
+  
+  .start-stop-btn {
+    padding: 12px 30px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+  }
+  
+  .start-stop-btn:hover {
+    background-color: #45a049;
+  }
+  
+  .start-stop-btn:active {
+    background-color: #3e8e41;
+  }
+  
