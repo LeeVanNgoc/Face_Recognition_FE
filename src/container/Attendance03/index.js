@@ -1,11 +1,12 @@
 import React, { useRef, useState, useEffect } from 'react';
-import './WebcamCapture.css'; // Để import CSS
+import './WebcamCapture.css';
 
 export default function WebcamCapture() {
   const videoRef = useRef();
   const canvasRef = useRef();
-  const [isRecording, setIsRecording] = useState(false);  // Trạng thái ghi hình
-  const [errorMessage, setErrorMessage] = useState("");  // Trạng thái lỗi
+  const [isRecording, setIsRecording] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [name, setName] = useState(""); // 👉 Thêm input cho tên
 
   useEffect(() => {
     if (isRecording) {
@@ -17,7 +18,6 @@ export default function WebcamCapture() {
         console.error("Webcam error:", err);
       });
     } else {
-      // Dừng ghi hình khi isRecording là false
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject;
         const tracks = stream.getTracks();
@@ -26,7 +26,6 @@ export default function WebcamCapture() {
     }
 
     return () => {
-      // Dừng stream khi component unmount
       if (videoRef.current && videoRef.current.srcObject) {
         const stream = videoRef.current.srcObject;
         const tracks = stream.getTracks();
@@ -35,14 +34,17 @@ export default function WebcamCapture() {
     };
   }, [isRecording]);
 
-  // Hàm để bắt đầu/ dừng ghi video
   const toggleRecording = () => {
     setIsRecording(prev => !prev);
   };
 
-  // Hàm chụp ảnh và gửi đi
-  const captureAndSend = async () => {
+  const captureAndEnroll = async () => {
     try {
+      if (!name.trim()) {
+        setErrorMessage("Bạn cần nhập tên để đăng ký.");
+        return;
+      }
+
       const canvas = canvasRef.current;
       const video = videoRef.current;
       canvas.width = video.videoWidth;
@@ -51,58 +53,72 @@ export default function WebcamCapture() {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const base64Image = canvas.toDataURL("image/jpeg");
+      const blob = await new Promise(resolve =>
+        canvas.toBlob(resolve, "image/jpeg")
+      );
 
-      const res = await fetch("http://localhost:5001/api/recognize", {
+      const formData = new FormData();
+      formData.append("image", blob, "face.jpg");
+      formData.append("name", name);
+
+      const res = await fetch("http://localhost:5001/api/enroll", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ image: base64Image }),
+        body: formData,
       });
 
       if (!res.ok) {
-        throw new Error(`Failed to fetch: ${res.statusText}`);
+        throw new Error(`Lỗi server: ${res.statusText}`);
       }
 
       const data = await res.json();
-      console.log(data); // kết quả nhận diện: tên, bbox
-      setErrorMessage("");  // Xóa lỗi nếu thành công
+      console.log(data);
+      setErrorMessage("");
+      alert("🟢 Đã đăng ký thành công!");
     } catch (error) {
-      setErrorMessage("Có lỗi xảy ra khi gửi ảnh tới server.");
-      console.error("Error in capture and send:", error);
+      setErrorMessage("Lỗi khi gửi dữ liệu đến server.");
+      console.error("Enroll error:", error);
     }
   };
 
-  // Bắt đầu hoặc dừng ghi ảnh theo nút nhấn
   const handleStartStop = () => {
     if (!isRecording) {
-      toggleRecording(); // Bắt đầu ghi
+      toggleRecording();
     }
 
-    // Gửi ảnh nếu đang ghi hình
     if (isRecording) {
-      captureAndSend(); // Gửi ảnh mỗi lần nút nhấn
+      captureAndEnroll();
     }
   };
 
   return (
     <div className="webcam-container">
       <header className="webcam-header">
-        <h1>Ứng Dụng Nhận Diện Khuôn Mặt</h1>
-        <p className="header-description">Chụp ảnh và nhận diện khuôn mặt trực tiếp từ webcam của bạn.</p>
+        <h1>Đăng Ký Khuôn Mặt Mới</h1>
+        <p className="header-description">
+          Nhập tên và chụp ảnh từ webcam để thêm vào hệ thống nhận diện.
+        </p>
       </header>
-      
+
       <div className="webcam-frame">
         <video ref={videoRef} width="640" height="480" className="webcam-video" />
         <canvas ref={canvasRef} style={{ display: "none" }} />
-        
+
+        <div className="input-group">
+          <input
+            type="text"
+            placeholder="Nhập tên bạn"
+            value={name}
+            onChange={e => setName(e.target.value)}
+            className="name-input"
+          />
+        </div>
+
         <div className="controls">
           <button className="start-stop-btn" onClick={handleStartStop}>
-            {isRecording ? "Dừng Ghi" : "Bắt Đầu Ghi"}
+            {isRecording ? "Chụp & Đăng Ký" : "Bật Webcam"}
           </button>
         </div>
-        
+
         {errorMessage && (
           <div className="error-message">
             <p>{errorMessage}</p>
@@ -112,3 +128,4 @@ export default function WebcamCapture() {
     </div>
   );
 }
+  
