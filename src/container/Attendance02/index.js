@@ -1,11 +1,31 @@
-import React, { useRef, useState, useEffect } from 'react';
-import './WebcamCapture.css'; // Để import CSS
+import React, { useRef, useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  Alert,
+  Stack,
+  Grid,
+  Divider,
+  List,
+  ListItem,
+  ListItemText,
+  Drawer,
+  Toolbar,
+  AppBar,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+const drawerWidth = 240;
 
 export default function WebcamCapture() {
+  const navigate = useNavigate();
   const videoRef = useRef();
   const canvasRef = useRef();
-  const [isRecording, setIsRecording] = useState(false);  // Trạng thái ghi hình
-  const [errorMessage, setErrorMessage] = useState("");  // Trạng thái lỗi
+  const [isRecording, setIsRecording] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     if (isRecording) {
@@ -17,30 +37,24 @@ export default function WebcamCapture() {
         console.error("Webcam error:", err);
       });
     } else {
-      // Dừng ghi hình khi isRecording là false
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject;
-        const tracks = stream.getTracks();
+      if (videoRef.current?.srcObject) {
+        const tracks = videoRef.current.srcObject.getTracks();
         tracks.forEach(track => track.stop());
       }
     }
 
     return () => {
-      // Dừng stream khi component unmount
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject;
-        const tracks = stream.getTracks();
+      if (videoRef.current?.srcObject) {
+        const tracks = videoRef.current.srcObject.getTracks();
         tracks.forEach(track => track.stop());
       }
     };
   }, [isRecording]);
 
-  // Hàm để bắt đầu/ dừng ghi video
   const toggleRecording = () => {
     setIsRecording(prev => !prev);
   };
 
-  // Hàm chụp ảnh và gửi đi
   const captureAndSend = async () => {
     try {
       const canvas = canvasRef.current;
@@ -61,54 +75,131 @@ export default function WebcamCapture() {
         body: JSON.stringify({ image: base64Image }),
       });
 
-      if (!res.ok) {
-        throw new Error(`Failed to fetch: ${res.statusText}`);
-      }
+      if (!res.ok) throw new Error(`Lỗi server: ${res.statusText}`);
 
       const data = await res.json();
-      console.log(data); // kết quả nhận diện: tên, bbox
-      setErrorMessage("");  // Xóa lỗi nếu thành công
+      setErrorMessage("");
+      setUserData(data.name !== "Unknown" ? data : null);
     } catch (error) {
-      setErrorMessage("Có lỗi xảy ra khi gửi ảnh tới server.");
-      console.error("Error in capture and send:", error);
+      setUserData(null);
+      setErrorMessage("Lỗi khi gửi ảnh tới server.");
+      console.error("Error in captureAndSend:", error);
     }
   };
 
-  // Bắt đầu hoặc dừng ghi ảnh theo nút nhấn
   const handleStartStop = () => {
     if (!isRecording) {
-      toggleRecording(); // Bắt đầu ghi
-    }
-
-    // Gửi ảnh nếu đang ghi hình
-    if (isRecording) {
-      captureAndSend(); // Gửi ảnh mỗi lần nút nhấn
+      toggleRecording();
+    } else {
+      captureAndSend();
     }
   };
 
   return (
-    <div className="webcam-container">
-      <header className="webcam-header">
-        <h1>Ứng Dụng Nhận Diện Khuôn Mặt</h1>
-        <p className="header-description">Chụp ảnh và nhận diện khuôn mặt trực tiếp từ webcam của bạn.</p>
-      </header>
-      
-      <div className="webcam-frame">
-        <video ref={videoRef} width="640" height="480" className="webcam-video" />
-        <canvas ref={canvasRef} style={{ display: "none" }} />
-        
-        <div className="controls">
-          <button className="start-stop-btn" onClick={handleStartStop}>
-            {isRecording ? "Dừng Ghi" : "Bắt Đầu Ghi"}
-          </button>
-        </div>
-        
-        {errorMessage && (
-          <div className="error-message">
-            <p>{errorMessage}</p>
-          </div>
-        )}
-      </div>
-    </div>
+    <Box sx={{ display: "flex" }}>
+      {/* AppBar */}
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <Typography variant="h6" noWrap>
+            Hệ thống nhận diện khuôn mặt
+          </Typography>
+        </Toolbar>
+      </AppBar>
+
+      {/* Drawer menu */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
+        }}
+      >
+        <Toolbar />
+        <List>
+          <ListItem button onClick={() => navigate("/attendance")}>
+            <ListItemText primary="Lịch làm việc" />
+          </ListItem>
+          <ListItem button sx={{ color: 'red' }} onClick={() => navigate("/attendance/collect")}>
+            <ListItemText primary="Chấm công" />
+          </ListItem>
+          <ListItem button onClick={() => navigate("/attendance/added")}>
+            <ListItemText primary="Đơn từ" />
+          </ListItem>
+        </List>
+      </Drawer>
+
+      {/* Nội dung chính */}
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+        <Grid container spacing={4}>
+          {/* Webcam */}
+          <Grid item xs={12} md={8}>
+            <Paper sx={{ p: 3, borderRadius: 2 }}>
+              <Typography variant="h6" gutterBottom>
+                Webcam (Nhận diện)
+              </Typography>
+              <Box
+                component="video"
+                ref={videoRef}
+                sx={{
+                  width: "100%",
+                  maxHeight: 400,
+                  borderRadius: 2,
+                  boxShadow: 2,
+                  mb: 2,
+                }}
+              />
+              <canvas ref={canvasRef} style={{ display: "none" }} />
+              <Button
+                variant="contained"
+                color={isRecording ? "success" : "primary"}
+                onClick={handleStartStop}
+                fullWidth
+              >
+                {isRecording ? "Chụp & Nhận Diện" : "Bật Webcam"}
+              </Button>
+              {errorMessage && (
+                <Alert severity="error" sx={{ mt: 2 }}>
+                  {errorMessage}
+                </Alert>
+              )}
+            </Paper>
+          </Grid>
+
+          {/* Thông tin người dùng */}
+          <Grid item xs={12} md={4}>
+            <Paper sx={{ p: 3, borderRadius: 2, minHeight: 400 }}>
+              <Typography variant="h6" gutterBottom>
+                Thông tin người dùng
+              </Typography>
+              <Divider sx={{ mb: 2 }} />
+              {userData ? (
+                <List>
+                  <ListItem>
+                    <ListItemText primary="Tên" secondary={userData.name} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText
+                      primary="Chỉ số tương đồng"
+                      secondary={userData.similarity?.toFixed(3) || "Không rõ"}
+                    />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText
+                      primary="Thời gian"
+                      secondary={new Date().toLocaleString()}
+                    />
+                  </ListItem>
+                </List>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Không có thông tin người dùng nào được nhận diện.
+                </Typography>
+              )}
+            </Paper>
+          </Grid>
+        </Grid>
+      </Box>
+    </Box>
   );
 }

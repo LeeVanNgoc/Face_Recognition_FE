@@ -1,47 +1,64 @@
-import React, { useRef, useState, useEffect } from 'react';
-import './WebcamCapture.css';
+import React, { useRef, useState, useEffect } from "react";
+import {
+  Box,
+  Typography,
+  Paper,
+  Button,
+  TextField,
+  Alert,
+  Stack,
+  Drawer,
+  Toolbar,
+  List,
+  ListItem,
+  ListItemText,
+  AppBar,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+
+const drawerWidth = 240;
 
 export default function WebcamCapture() {
+  const navigate = useNavigate();
   const videoRef = useRef();
   const canvasRef = useRef();
   const [isRecording, setIsRecording] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [name, setName] = useState(""); // 👉 Thêm input cho tên
+  const [id, setId] = useState("");
 
   useEffect(() => {
     if (isRecording) {
-      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-        videoRef.current.srcObject = stream;
-        videoRef.current.play();
-      }).catch(err => {
-        setErrorMessage("Không thể truy cập webcam.");
-        console.error("Webcam error:", err);
-      });
+      navigator.mediaDevices
+        .getUserMedia({ video: true })
+        .then((stream) => {
+          videoRef.current.srcObject = stream;
+          videoRef.current.play();
+        })
+        .catch((err) => {
+          setErrorMessage("Không thể truy cập webcam.");
+          console.error("Webcam error:", err);
+        });
     } else {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject;
-        const tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
     }
 
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        const stream = videoRef.current.srcObject;
-        const tracks = stream.getTracks();
-        tracks.forEach(track => track.stop());
+      if (videoRef.current?.srcObject) {
+        videoRef.current.srcObject.getTracks().forEach((track) => track.stop());
       }
     };
   }, [isRecording]);
 
   const toggleRecording = () => {
-    setIsRecording(prev => !prev);
+    setIsRecording((prev) => !prev);
   };
 
   const captureAndEnroll = async () => {
     try {
-      if (!name.trim()) {
-        setErrorMessage("Bạn cần nhập tên để đăng ký.");
+      if (!id.trim()) {
+        setErrorMessage("Bạn cần nhập mã nhân viên để đăng ký.");
         return;
       }
 
@@ -53,13 +70,13 @@ export default function WebcamCapture() {
       const ctx = canvas.getContext("2d");
       ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
 
-      const blob = await new Promise(resolve =>
+      const blob = await new Promise((resolve) =>
         canvas.toBlob(resolve, "image/jpeg")
       );
 
       const formData = new FormData();
       formData.append("image", blob, "face.jpg");
-      formData.append("name", name);
+      formData.append("name", id);
 
       const res = await fetch("http://localhost:5001/api/enroll", {
         method: "POST",
@@ -71,7 +88,6 @@ export default function WebcamCapture() {
       }
 
       const data = await res.json();
-      console.log(data);
       setErrorMessage("");
       alert("🟢 Đã đăng ký thành công!");
     } catch (error) {
@@ -83,49 +99,93 @@ export default function WebcamCapture() {
   const handleStartStop = () => {
     if (!isRecording) {
       toggleRecording();
-    }
-
-    if (isRecording) {
+    } else {
       captureAndEnroll();
     }
   };
 
   return (
-    <div className="webcam-container">
-      <header className="webcam-header">
-        <h1>Đăng Ký Khuôn Mặt Mới</h1>
-        <p className="header-description">
-          Nhập tên và chụp ảnh từ webcam để thêm vào hệ thống nhận diện.
-        </p>
-      </header>
+    <Box sx={{ display: "flex" }}>
+      {/* AppBar */}
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+        <Toolbar>
+          <Typography variant="h6" noWrap>
+            Ứng Dụng Nhận Diện
+          </Typography>
+        </Toolbar>
+      </AppBar>
 
-      <div className="webcam-frame">
-        <video ref={videoRef} width="640" height="480" className="webcam-video" />
-        <canvas ref={canvasRef} style={{ display: "none" }} />
+      {/* Drawer menu */}
+      <Drawer
+        variant="permanent"
+        sx={{
+          width: drawerWidth,
+          flexShrink: 0,
+          [`& .MuiDrawer-paper`]: { width: drawerWidth, boxSizing: "border-box" },
+        }}
+      >
+        <Toolbar />
+        <List>
+          <ListItem button  onClick={() => navigate("/attendance")}>
+            <ListItemText primary="Lịch làm việc" />
+          </ListItem>
+          <ListItem button onClick={() => navigate("/attendance/collect")}>
+            <ListItemText primary="Chấm công" />
+          </ListItem>
+          <ListItem button style={{color: 'red'}} onClick={() => navigate("/attendance/added")}>
+            <ListItemText primary="Đơn từ" />
+          </ListItem>
+        </List>
+      </Drawer>
 
-        <div className="input-group">
-          <input
-            type="text"
-            placeholder="Nhập tên bạn"
-            value={name}
-            onChange={e => setName(e.target.value)}
-            className="name-input"
-          />
-        </div>
+      {/* Main content */}
+      <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
+        <Paper elevation={3} sx={{ p: 4, borderRadius: 3, maxWidth: 720, mx: "auto" }}>
+          <Stack spacing={2} alignItems="center">
+            <Typography variant="h5" align="center" fontWeight={600}>
+              Đăng Ký Khuôn Mặt Mới
+            </Typography>
+            <Typography variant="body2" align="center">
+              Nhập mã nhân viên và chụp ảnh từ webcam để thêm vào hệ thống nhận diện.
+            </Typography>
 
-        <div className="controls">
-          <button className="start-stop-btn" onClick={handleStartStop}>
-            {isRecording ? "Chụp & Đăng Ký" : "Bật Webcam"}
-          </button>
-        </div>
+            <Box
+              component="video"
+              ref={videoRef}
+              sx={{
+                width: "100%",
+                maxWidth: 640,
+                borderRadius: 2,
+                boxShadow: 2,
+              }}
+            />
+            <canvas ref={canvasRef} style={{ display: "none" }} />
 
-        {errorMessage && (
-          <div className="error-message">
-            <p>{errorMessage}</p>
-          </div>
-        )}
-      </div>
-    </div>
+            <TextField
+              fullWidth
+              label="Mã nhân viên"
+              value={id}
+              onChange={(e) => setId(e.target.value)}
+              sx={{ maxWidth: 300 }}
+            />
+
+            <Button
+              variant="contained"
+              color={isRecording ? "success" : "primary"}
+              onClick={handleStartStop}
+              sx={{ width: 220 }}
+            >
+              {isRecording ? "Chụp & Đăng Ký" : "Bật Webcam"}
+            </Button>
+
+            {errorMessage && (
+              <Alert severity="error" sx={{ mt: 1 }}>
+                {errorMessage}
+              </Alert>
+            )}
+          </Stack>
+        </Paper>
+      </Box>
+    </Box>
   );
 }
-  
