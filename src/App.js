@@ -4,6 +4,8 @@ import Dashboard from "./layouts/Dashboard";
 import Attendance01 from "./container/Attendance01/index";
 import Attendance02 from "./container/Attendance02/index";
 import Attendance03 from "./container/Attendance03/index";
+import Attendance04 from "./container/Attendance04/index";
+
 
 import User01 from "./container/User01/index";
 import User02 from "./container/User02/index";
@@ -21,6 +23,7 @@ function App() {
         <Route path="/attendance" element={<Attendance01/>} />
         <Route path="/attendance/collect" element={<Attendance02/>} />
         <Route path="/attendance/added" element={<Attendance03/>} />
+        <Route path="/attendance/automatic" element={<Attendance04/>} />
       </Routes>
     </Router>
   );

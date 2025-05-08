@@ -124,6 +124,9 @@ export default function WebcamCapture() {
           <ListItem button onClick={() => navigate("/attendance/added")}>
             <ListItemText primary="Đăng ký khuôn mặt" />
           </ListItem>
+          <ListItem button onClick={() => navigate("/attendance/automatic")}>
+            <ListItemText primary="Chấm công tự động" />
+          </ListItem>
         </List>
       </Drawer>
 
