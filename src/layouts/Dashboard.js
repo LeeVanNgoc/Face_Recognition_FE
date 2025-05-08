@@ -9,10 +9,12 @@ import {
   Grid,
 } from "@mui/material";
 import { Person, AccessTime } from "@mui/icons-material";
+import logo from './logo_transparent.png';
+
 
 const Dashboard = () => {
   return (
-    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+    <Box sx={{ height: "100vh", display: "flex", flexDirection: "column", backgroundColor: '#93e1fe'  }}>
       <Box
         sx={{
           flex: 1,
@@ -22,6 +24,17 @@ const Dashboard = () => {
           flexDirection: "column",
         }}
       >
+        <Grid item>
+          <Box
+            component="img"
+            src={logo}
+            alt="Logo"
+            sx={{
+              height: 240, // điều chỉnh kích thước logo
+              mb: 2,
+            }}
+          />
+        </Grid>
         <Grid container marginBottom={10} justifyContent="center" direction="column">
           <Grid item>
             <Typography style={{ textAlign: 'center', fontSize: '32px', textTransform: "uppercase", fontWeight: "bold"}}>

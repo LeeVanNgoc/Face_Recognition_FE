@@ -142,6 +142,19 @@ export default function WebcamCaptureAutomatic() {
             <Paper sx={{ p: 3, borderRadius: 2, width: 600 }}>
               <Typography variant="h6" gutterBottom> Thông tin người dùng </Typography>
               <Divider sx={{ mb: 2 }} />
+              {userData?.user ? (
+                <Stack spacing={2} alignItems="center">
+                  {/* ... user info ... */}
+                </Stack>
+              ) : userData?.status === "error" || userData?.name === "Unknown" ? (
+                <Alert severity="warning" sx={{ width: '100%' }}>
+                  Không tìm thấy người dùng tương ứng trong hệ thống.
+                </Alert>
+              ) : (
+                <Typography variant="body2" color="text.secondary">
+                  Đang chờ nhận diện khuôn mặt...
+                </Typography>
+              )}
               <Stack spacing={2} alignItems="center">
                 {userData?.user?.image ? (
                   <Box component="img" src={userData.user.image} alt="Ảnh người dùng" sx={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", boxShadow: 2 }} />
