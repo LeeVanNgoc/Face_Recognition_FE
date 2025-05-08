@@ -109,8 +109,14 @@ export default function WebcamCapture() {
       {/* AppBar */}
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          <Typography variant="h6" noWrap>
-            Ứng Dụng Nhận Diện
+        <Box
+            component="img"
+            src="/src/layouts/LogoNgocHuy.png" // 👉 thay bằng đường dẫn hoặc URL logo của bạn
+            alt="Logo"
+            sx={{ height: 32, width: 32, marginRight: 1 }}
+          />
+          <Typography variant="h6" noWrap onClick={() => navigate("/")} sx={{ cursor: 'pointer' }} >
+          Hệ thống quản lý chấm công
           </Typography>
         </Toolbar>
       </AppBar>
@@ -127,13 +133,13 @@ export default function WebcamCapture() {
         <Toolbar />
         <List>
           <ListItem button  onClick={() => navigate("/attendance")}>
-            <ListItemText primary="Lịch làm việc" />
+            <ListItemText primary="Lịch chấm công" />
           </ListItem>
           <ListItem button onClick={() => navigate("/attendance/collect")}>
             <ListItemText primary="Chấm công" />
           </ListItem>
           <ListItem button style={{color: 'red'}} onClick={() => navigate("/attendance/added")}>
-            <ListItemText primary="Đơn từ" />
+            <ListItemText primary="Đăng ký khuôn mặt" />
           </ListItem>
         </List>
       </Drawer>

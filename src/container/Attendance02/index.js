@@ -97,16 +97,14 @@ export default function WebcamCapture() {
 
   return (
     <Box sx={{ display: "flex" }}>
-      {/* AppBar */}
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          <Typography variant="h6" noWrap>
-            Hệ thống nhận diện khuôn mặt
+          <Typography variant="h6" noWrap onClick={() => navigate("/")} sx={{ cursor: 'pointer' }} >
+            Hệ thống quản lý chấm công
           </Typography>
         </Toolbar>
       </AppBar>
 
-      {/* Drawer menu */}
       <Drawer
         variant="permanent"
         sx={{
@@ -118,23 +116,21 @@ export default function WebcamCapture() {
         <Toolbar />
         <List>
           <ListItem button onClick={() => navigate("/attendance")}>
-            <ListItemText primary="Lịch làm việc" />
+            <ListItemText primary="Lịch chấm công" />
           </ListItem>
           <ListItem button sx={{ color: 'red' }} onClick={() => navigate("/attendance/collect")}>
             <ListItemText primary="Chấm công" />
           </ListItem>
           <ListItem button onClick={() => navigate("/attendance/added")}>
-            <ListItemText primary="Đơn từ" />
+            <ListItemText primary="Đăng ký khuôn mặt" />
           </ListItem>
         </List>
       </Drawer>
 
-      {/* Nội dung chính */}
       <Box component="main" sx={{ flexGrow: 1, p: 3, mt: 8 }}>
         <Grid container spacing={4}>
-          {/* Webcam */}
-          <Grid item xs={12} md={8}>
-            <Paper sx={{ p: 3, borderRadius: 2 }}>
+          <Grid item xs={12} md={4} >
+            <Paper sx={{ p: 3, borderRadius: 2, width: 600 }}>
               <Typography variant="h6" gutterBottom>
                 Webcam (Nhận diện)
               </Typography>
@@ -143,10 +139,11 @@ export default function WebcamCapture() {
                 ref={videoRef}
                 sx={{
                   width: "100%",
-                  maxHeight: 400,
+                  height: 450,
                   borderRadius: 2,
                   boxShadow: 2,
                   mb: 2,
+                  backgroundColor: "#eee"
                 }}
               />
               <canvas ref={canvasRef} style={{ display: "none" }} />
@@ -166,36 +163,73 @@ export default function WebcamCapture() {
             </Paper>
           </Grid>
 
-          {/* Thông tin người dùng */}
-          <Grid item xs={12} md={4}>
-            <Paper sx={{ p: 3, borderRadius: 2, minHeight: 400 }}>
+          <Grid item xs={12} md={6}>
+            <Paper sx={{ p: 3, borderRadius: 2, width: 600 }}>
               <Typography variant="h6" gutterBottom>
                 Thông tin người dùng
               </Typography>
               <Divider sx={{ mb: 2 }} />
-              {userData ? (
-                <List>
+
+              <Stack spacing={2} alignItems="center">
+                {userData?.user?.image ? (
+                  <Box
+                    component="img"
+                    src={userData.user.image}
+                    alt="Ảnh người dùng"
+                    sx={{ width: 120, height: 120, borderRadius: "50%", objectFit: "cover", boxShadow: 2 }}
+                  />
+                ) : (
+                  <Box
+                    sx={{
+                      width: 120,
+                      height: 120,
+                      borderRadius: "50%",
+                      backgroundColor: "#ccc",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      fontSize: 14,
+                      color: "#666",
+                      boxShadow: 2,
+                    }}
+                  >
+                    No Image
+                  </Box>
+                )}
+
+                <List sx={{ width: '100%' }}>
                   <ListItem>
-                    <ListItemText primary="Tên" secondary={userData.name} />
+                    <ListItemText primary="Tên" secondary={userData?.user?.fullName || "—"} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Email" secondary={userData?.user?.email || "—"} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Số điện thoại" secondary={userData?.user?.phone || "—"} />
+                  </ListItem>
+                  <ListItem>
+                    <ListItemText primary="Địa chỉ" secondary={userData?.user?.address || "—"} />
                   </ListItem>
                   <ListItem>
                     <ListItemText
-                      primary="Chỉ số tương đồng"
-                      secondary={userData.similarity?.toFixed(3) || "Không rõ"}
+                      primary="Giới tính"
+                      secondary={
+                        userData?.user?.gender === "0"
+                          ? "Nam"
+                          : userData?.user?.gender === "1"
+                          ? "Nữ"
+                          : "Không rõ"
+                      }
                     />
                   </ListItem>
                   <ListItem>
                     <ListItemText
-                      primary="Thời gian"
-                      secondary={new Date().toLocaleString()}
+                      primary="Thời gian chấm công"
+                      secondary={userData ? new Date().toLocaleString() : "—"}
                     />
                   </ListItem>
                 </List>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  Không có thông tin người dùng nào được nhận diện.
-                </Typography>
-              )}
+              </Stack>
             </Paper>
           </Grid>
         </Grid>
