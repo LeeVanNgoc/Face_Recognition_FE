@@ -9,16 +9,14 @@ import {
   ListItemText,
   Box,
   Card,
-  CardHeader,
   CardContent,
+  TextField,
+  Autocomplete
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-
-// import '@fullcalendar/common/main.css';
-// import '@fullcalendar/daygrid/main.css';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
-import { getAttendanceEvents } from "./config";  // Import hàm lấy sự kiện
+import { getAttendanceEvents, getUsers } from "./config";  // Import hàm lấy sự kiện
 
 // Định nghĩa hàm style ngoài
 const useStyles = () => ({
@@ -33,32 +31,35 @@ const useStyles = () => ({
 const drawerWidth = 240;
 
 const Calendar = () => {
-  const [events, setEvents] = useState([]); // Lưu trữ sự kiện lấy từ API
   const navigate = useNavigate();
   const styles = useStyles(); // Sử dụng hàm style
+  const [userList, setUserList] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [events, setEvents] = useState([]);
 
   useEffect(() => {
-    const fetchEvents = async () => {
-      const result = await getAttendanceEvents("user1"); // Thay userId là 'user1'
-      console.log('boss', result);
-      if (!result.error) {
-        setEvents(result); // Cập nhật state với các sự kiện từ API
-      } else {
-        console.error(result.message);
+    const fetchInitialData = async () => {
+      const users = await getUsers();
+      if (!users.error) {
+        setUserList(users);
+        // Mặc định chọn user đầu tiên
+        const defaultUser = users[0];
+        setSelectedUser(defaultUser);
+        const result = await getAttendanceEvents(defaultUser.id);
+        if (!result.error) setEvents(result);
       }
     };
-
-    fetchEvents();
+  
+    fetchInitialData();
   }, []);
 
-  console.log(events)
   return (
     <Box sx={{ display: "flex", height: "100vh", marginTop: 10 }}>
       {/* AppBar header */}
       <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
-          <Typography variant="h6" noWrap component="div">
-            Quản lý Lịch
+          <Typography variant="h6" noWrap component="div" onClick={() => navigate("/")} sx={{ cursor: 'pointer' }} >
+          Hệ thống quản lý chấm công
           </Typography>
         </Toolbar>
       </AppBar>
@@ -79,21 +80,38 @@ const Calendar = () => {
         <Toolbar />
         <List>
           <ListItem button style={{color: 'red'}} onClick={() => navigate("/attendance")}>
-            <ListItemText primary="Lịch làm việc" />
+            <ListItemText primary="Lịch chấm công" />
           </ListItem>
           <ListItem button onClick={() => navigate("/attendance/collect")}>
             <ListItemText primary="Chấm công" />
           </ListItem>
           <ListItem button onClick={() => navigate("/attendance/added")}>
-            <ListItemText primary="Đơn từ" />
+            <ListItemText primary="Đăng ký khuôn mặt" />
           </ListItem>
         </List>
       </Drawer>
 
       {/* Nội dung chính */}
-      <Box sx={{ padding: 3, flexGrow: 1 }}>
+      <Box display="flex" justifyContent="space-between" alignItems="center" px={2} pt={2}>
         <Card>
-          <CardHeader title="Lịch làm việc toàn công ty" />
+        <Box display="flex" justifyContent="space-between" alignItems="center" px={2} pt={2}>
+            <Typography variant="h6">Lịch chấm công</Typography>
+            <Autocomplete
+              options={userList}
+              getOptionLabel={(option) => `${option.id} - ${option.fullName}`}
+              value={selectedUser}
+              onChange={async (e, newValue) => {
+                setSelectedUser(newValue);
+                if (newValue) {
+                  const result = await getAttendanceEvents(newValue.id);
+                  if (!result.error) setEvents(result);
+                  else setEvents([]);
+                }
+              }}
+              sx={{ width: 300 }}
+              renderInput={(params) => <TextField {...params} label="Chọn nhân viên" size="small" />}
+            />
+          </Box>
           <CardContent>
             <FullCalendar
               initialView="dayGridMonth"
